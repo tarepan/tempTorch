@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 from dataclasses import dataclass
 from hashlib import md5
 
-from torch import Tensor, from_numpy, stack, load # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
+from torch import from_numpy, stack, load # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
 from torch.utils.data import Dataset
 import numpy as np
 from numpy.typing import NDArray
@@ -16,6 +16,7 @@ from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId # pyri
 from speechdatasety.helper.archive import try_to_acquire_archive_contents, save_archive # pyright: ignore [reportMissingTypeStubs]
 from speechdatasety.helper.adress import dataset_adress, generate_path_getter # pyright: ignore [reportMissingTypeStubs]
 
+from ..domain import FugaBatched, HogeBatched, HogeFugaBatch, LenFuga
 from .preprocessing import preprocess_hogefuga, ConfPreprocessing
 
 
@@ -39,17 +40,8 @@ HogeDatum = NDArray[np.float32]
 FugaDatum = NDArray[np.float32]
 ## the datum
 HogeFugaDatum = Tuple[Hoge, Fuga]
-
-# Data batch
-## HogeBatched :: (Batch=b, ...) - hoge hoge
-HogeBatched = Tensor
-## FugaBatched :: (Batch=b, ...) - fuga fuga
-FugaBatched = Tensor
-## LenFuga :: (b,) - Non-padded length of items in the FugaBatched
-LenFuga = List[int]
-## the batch
-HogeFugaBatch = Tuple[HogeBatched, FugaBatched, LenFuga]
 ##########################################################################################
+
 
 """
 (delele here when template is used)
