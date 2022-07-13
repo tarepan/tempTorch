@@ -5,9 +5,10 @@ from typing import Optional
 from dataclasses import dataclass
 
 from omegaconf import MISSING
+from configen import generate_conf_loader # pyright: ignore [reportMissingTypeStubs]
+from lightlightning import ConfTrain # pyright: ignore [reportMissingTypeStubs]
 
 from .data.datamodule import ConfData
-from .train import ConfTrain
 from .model import ConfModel
 
 
@@ -49,7 +50,14 @@ data:
         num_workers: null
         pin_memory: null
 train:
-
+    gradient_clipping: null
+    max_epochs: 10000
+    val_interval_epoch: 100
+    profiler: null
+    ckpt_log:
+        dir_root: "."
+        name_exp: "default"
+        name_version: "version_0"
 """
 
 @dataclass

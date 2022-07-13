@@ -16,6 +16,8 @@ tqdm = "^4.0.0"
 omegaconf = "^2.1.1"
 speechcorpusy = {git = "https://github.com/tarepan/speechcorpusy.git", rev = "main"}
 speechdatasety = {git = "https://github.com/tarepan/speechdatasety.git", rev = "main"}
+configen = {git = "https://github.com/tarepan/configen.git", rev = "main"}
+lightlightning = {git = "https://github.com/tarepan/lightlightning.git", rev = "main"}
 ## Dependencies for Audio
 # pyloudnorm = "^0.1.0"
 # librosa = "^0.8.0"
