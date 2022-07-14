@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 from dataclasses import dataclass
 from hashlib import md5
 
-from torch import from_numpy, stack, load # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
+from torch import from_numpy, stack # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
 from torch.utils.data import Dataset
 import numpy as np
 from tqdm import tqdm
@@ -124,8 +124,8 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
         e.g. Random clipping, Random noise addition, Masking
         """
         # Load
-        hoge: Hoge = load(self.get_path_hoge(item_id))
-        fuga: Fuga = load(self.get_path_fuga(item_id))
+        hoge: Hoge = np.load(str(self.get_path_hoge(item_id))+".npy") # pyright: ignore [reportUnknownMemberType]
+        fuga: Fuga = np.load(str(self.get_path_fuga(item_id))+".npy") # pyright: ignore [reportUnknownMemberType]
 
         # Modify
         ## :: (T,) -> (T=10, 1)

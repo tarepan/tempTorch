@@ -54,5 +54,7 @@ def preprocess_hogefuga(conf: ConfPreprocessing, processor: Any, path_piyo: Path
     fuga = piyo_to_fuga(item)
 
     # Save
+    path_hoge.parent.mkdir(parents=True, exist_ok=True)
+    path_fuga.parent.mkdir(parents=True, exist_ok=True)
     np.save(path_hoge, hoge) # pyright: ignore [reportUnknownMemberType]
     np.save(path_fuga, fuga) # pyright: ignore [reportUnknownMemberType]
