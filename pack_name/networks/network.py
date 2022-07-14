@@ -14,12 +14,16 @@ from .child import Child, ConfChild
 @dataclass
 class ConfNetwork:
     """Configuration of the Network.
+
     Args:
         dim_i: Dimension size of input
+        dim_i: Dimension size of output
     """
     dim_i: int = MISSING
+    dim_o: int = MISSING
     child: ConfChild = ConfChild(
-        dim_i=SI("${..dim_i}"),)
+        dim_i=SI("${..dim_i}"),
+        dim_o=SI("${..dim_o}"),)
 
 class Network(nn.Module):
     """The Network.
@@ -37,9 +41,10 @@ class Network(nn.Module):
         Arguments:
             hoge - Input Hoge
         Returns:
-            o_pred :: (Batch, ...) - Prediction
+            o_pred :: (Batch, T, Feat=dim_o) - Prediction
         """
-        # Submodule :: (Batch, ...) -> (Batch, ...)
+
+        # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         o_pred = self._child(hoge)
 
         return o_pred
@@ -50,10 +55,10 @@ class Network(nn.Module):
         Arguments:
             hoge - Input Hoge
         Returns:
-            o_pred :: (Batch, ...) - Prediction
+            o_pred :: (Batch, T, Feat=dim_o) - Prediction
         """
 
-        # Submodule :: (Batch, ...) -> (Batch, ...)
+        # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         o_pred = self._child(hoge)
 
         return o_pred

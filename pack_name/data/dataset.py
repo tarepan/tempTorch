@@ -12,9 +12,9 @@ import numpy as np
 from numpy.typing import NDArray
 from tqdm import tqdm
 from omegaconf import MISSING, SI
-from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId # pyright: ignore [reportMissingTypeStubs]
+from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId               # pyright: ignore [reportMissingTypeStubs]
 from speechdatasety.helper.archive import try_to_acquire_archive_contents, save_archive # pyright: ignore [reportMissingTypeStubs]
-from speechdatasety.helper.adress import dataset_adress, generate_path_getter # pyright: ignore [reportMissingTypeStubs]
+from speechdatasety.helper.adress import dataset_adress, generate_path_getter           # pyright: ignore [reportMissingTypeStubs]
 
 from ..domain import FugaBatched, HogeBatched, HogeFugaBatch, LenFuga
 from .preprocessing import preprocess_hogefuga, ConfPreprocessing
@@ -22,21 +22,19 @@ from .preprocessing import preprocess_hogefuga, ConfPreprocessing
 
 ########################################## Data ##########################################
 # Statically-preprocessed item
-## Piyo :: (...) - piyo piyo
+## Piyo :: (T,) - piyo piyo
 Piyo = NDArray[np.float32]
-## Hoge :: (...) - hoge hoge
+## Hoge :: (T,) - hoge hoge
 Hoge = NDArray[np.float32]
-## Fuga :: (...) - fuga fuga
+## Fuga :: (T,) - fuga fuga
 Fuga = NDArray[np.float32]
 ## the item
 HogeFuga = Tuple[Hoge, Fuga]
 
 # Dynamically-transformed Dataset datum
-## Piyo :: (...) - piyo piyo
-PiyoDatum = NDArray[np.float32]
-## Hoge :: (...) - hoge hoge
+## Hoge :: (T=t, 1) - hoge hoge
 HogeDatum = NDArray[np.float32]
-## Fuga :: (...) - fuga fuga
+## Fuga :: (T=t, 1) - fuga fuga
 FugaDatum = NDArray[np.float32]
 ## the datum
 HogeFugaDatum = Tuple[Hoge, Fuga]
@@ -151,10 +149,11 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
         fuga: Fuga = load(self.get_path_fuga(item_id))
 
         # Modify
-        ## :: (...) -> (...)
-        hoge_datum: HogeDatum = hoge[:10]
-        ## :: (...) -> (...)
-        fuga_datum: FugaDatum = fuga[:10]
+        ## :: (T,) -> (T=10, 1)
+        hoge_datum: HogeDatum = np.expand_dims(hoge[:10], axis=-1) # pyright: ignore [reportUnknownMemberType]
+
+        ## :: (T,) -> (T=10, 1)
+        fuga_datum: FugaDatum = np.expand_dims(fuga[:10], axis=-1) # pyright: ignore [reportUnknownMemberType]
 
         return hoge_datum, fuga_datum
 
@@ -174,6 +173,6 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
 
         hoge_batched: HogeBatched = stack([from_numpy(item[0]) for item in items])
         fuga_batched: FugaBatched = stack([from_numpy(item[1]) for item in items])
-        len_fuga: LenFuga = [1, 2, 3]
+        len_fuga: LenFuga = [10, 10,]
 
         return hoge_batched, fuga_batched, len_fuga

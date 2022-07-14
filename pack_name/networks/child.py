@@ -37,11 +37,11 @@ class Child(nn.Module):
         """(PT API) Forward a batch.
 
         Arguments:
-            i_pred :: (Batch, ...) - Input
+            i_pred :: (Batch, T, Feat=dim_i) - Input
         Returns:
-            o_pred :: (Batch, ...) - Prediction
+            o_pred :: (Batch, T, Feat=dim_o) - Prediction
         """
-        # Submodule :: (Batch, ...) -> (Batch, ...)
+        # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         o_pred = self.fc1(i_pred)
 
         return o_pred
@@ -50,12 +50,12 @@ class Child(nn.Module):
         """Run inference with a batch.
 
         Arguments:
-            i_pred :: (Batch, ...) - Input
+            i_pred :: (Batch, T, Feat=dim_i) - Input
         Returns:
-            o_pred :: (Batch, ...) - Prediction
+            o_pred :: (Batch, T, Feat=dim_o) - Prediction
         """
 
-        # Submodule :: (Batch, ...) -> (Batch, ...)
+        # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         o_pred = self.fc1(i_pred)
 
         return o_pred

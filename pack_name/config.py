@@ -18,8 +18,8 @@ path_extend_conf: null
 model:
     net:
         dim_i: 1
+        dim_o: 1
         child:
-            dim_o: 1
             dropout: 0.5
     optim:
         learning_rate: 0.01
@@ -29,22 +29,22 @@ data:
     adress_data_root: ""
     corpus:
         train:
-            name: ""
+            name: "TEST"
             download: False
         val:
-            name: ""
+            name: "TEST"
             download: False
         test:
-            name: ""
+            name: "TEST"
             download: False
-        n_val: 10
-        n_test: 10
+        n_val: 1
+        n_test: 1
     dataset:
         attr1: 1
         preprocess:
-            attr2: 2
+            attr2: 100
     loader:
-        batch_size_train: 8
+        batch_size_train: 1
         batch_size_val: 1
         batch_size_test: 1
         num_workers: null

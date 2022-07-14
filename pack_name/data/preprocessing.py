@@ -10,15 +10,15 @@ from omegaconf import MISSING
 from .dataset import Piyo, Hoge, Fuga
 
 
-def item_to_hoge(item: Piyo) -> Hoge:
-    """Convert item to hoge.
+def piyo_to_hoge(item: Piyo) -> Hoge:
+    """Convert piyo to hoge.
     """
     hoge: Hoge = item
     return hoge
 
 
-def item_to_fuga(item: Piyo) -> Fuga:
-    """Convert item to fuga.
+def piyo_to_fuga(item: Piyo) -> Fuga:
+    """Convert piyo to fuga.
     """
     fuga: Fuga = item
     return fuga
@@ -34,25 +34,25 @@ class ConfPreprocessing:
     attr1: int = MISSING
     attr2: int = MISSING
 
-def preprocess_hogefuga(conf: ConfPreprocessing, processor: Any, path_item: Path, path_hoge: Path, path_fuga: Path) -> None:
+def preprocess_hogefuga(conf: ConfPreprocessing, processor: Any, path_piyo: Path, path_hoge: Path, path_fuga: Path) -> None:
     """Preprocess an item to hoge and fuga.
 
     Args:
         conf - Configuration
         processor - Processor instance, reused over items
-        path_item - Path of input 'piyo'
+        path_piyo - Path of input 'piyo'
         path_hoge - Path of output 'hoge'
         path_fuga - Path of output 'fuga'
     """
     # Load
     ## Audio
-    # item: Piyo = librosa.load(path_item, sr=16000, mono=True)[0]
-    item: Piyo = np.array([1.], dtype=np.float32)
+    # item: Piyo = librosa.load(path_piyo, sr=16000, mono=True)[0]
+    item: Piyo = np.array([1. for _ in range(conf.attr2)], dtype=np.float32) # pyright: ignore [reportUnknownMemberType]
 
     # Transform
-    hoge = item_to_hoge(item)
-    fuga = item_to_fuga(item)
+    hoge = piyo_to_hoge(item)
+    fuga = piyo_to_fuga(item)
 
     # Save
-    np.save(path_hoge, hoge)
-    np.save(path_fuga, fuga)
+    np.save(path_hoge, hoge) # pyright: ignore [reportUnknownMemberType]
+    np.save(path_fuga, fuga) # pyright: ignore [reportUnknownMemberType]

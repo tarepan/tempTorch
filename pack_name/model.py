@@ -48,7 +48,7 @@ class Model(pl.LightningModule):
         """
         hoge, _, _ = batch
 
-        # Inference :: (Batch, ...) -> (Batch, ...)
+        # Inference :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         return self._net.generate(hoge)
 
     # Typing of PL step API is poor. It is typed as `(self, *args, **kwargs)`.
@@ -58,11 +58,11 @@ class Model(pl.LightningModule):
 
         hoge, fuga_gt, _ = batch
 
-        # Forward
+        # Forward :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         fuga_pred = self._net(hoge)
 
         # Loss
-        loss = F.cross_entropy(fuga_pred, fuga_gt)
+        loss = F.l1_loss(fuga_pred, fuga_gt)
 
         self.log('loss', loss) #type: ignore ; because of PyTorch-Lightning
         return {"loss": loss}
@@ -73,15 +73,15 @@ class Model(pl.LightningModule):
 
         i_pred, o_gt, _ = batch
 
-        # Forward :: (Batch, ...) -> (Batch, ...)
+        # Forward :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         o_pred_fwd = self._net(i_pred)
 
-        # Inference :: (Batch, ...) -> (Batch, ...)
+        # Inference :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
         ## Usecase: Autoregressive model (`o_pred_fwd` for teacher-forcing, `o_pred_inf` for AR generation)
         # o_pred_inf = self.net.generate(i_pred)
 
         # Loss
-        loss_fwd = F.cross_entropy(o_pred_fwd, o_gt)
+        loss_fwd = F.l1_loss(o_pred_fwd, o_gt)
 
         # Logging
         ## Audio
