@@ -9,7 +9,6 @@ from hashlib import md5
 from torch import from_numpy, stack, load # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
 from torch.utils.data import Dataset
 import numpy as np
-from numpy.typing import NDArray
 from tqdm import tqdm
 from omegaconf import MISSING, SI
 from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId               # pyright: ignore [reportMissingTypeStubs]
@@ -17,28 +16,8 @@ from speechdatasety.helper.archive import try_to_acquire_archive_contents, save_
 from speechdatasety.helper.adress import dataset_adress, generate_path_getter           # pyright: ignore [reportMissingTypeStubs]
 
 from ..domain import FugaBatched, HogeBatched, HogeFugaBatch, LenFuga
+from .domain import Hoge, HogeDatum, Fuga, FugaDatum, HogeFugaDatum
 from .preprocessing import preprocess_hogefuga, ConfPreprocessing
-
-
-########################################## Data ##########################################
-# Statically-preprocessed item
-## Piyo :: (T,) - piyo piyo
-Piyo = NDArray[np.float32]
-## Hoge :: (T,) - hoge hoge
-Hoge = NDArray[np.float32]
-## Fuga :: (T,) - fuga fuga
-Fuga = NDArray[np.float32]
-## the item
-HogeFuga = Tuple[Hoge, Fuga]
-
-# Dynamically-transformed Dataset datum
-## Hoge :: (T=t, 1) - hoge hoge
-HogeDatum = NDArray[np.float32]
-## Fuga :: (T=t, 1) - fuga fuga
-FugaDatum = NDArray[np.float32]
-## the datum
-HogeFugaDatum = Tuple[Hoge, Fuga]
-##########################################################################################
 
 
 """

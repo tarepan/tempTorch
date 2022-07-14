@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 from omegaconf import MISSING
 
-from .dataset import Piyo, Hoge, Fuga
+from .domain import Piyo, Hoge, Fuga
 
 
 def piyo_to_hoge(item: Piyo) -> Hoge:

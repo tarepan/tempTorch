@@ -9,7 +9,8 @@ from omegaconf import MISSING, SI
 from speechdatasety.helper.loader import generate_loader, ConfLoader # pyright: ignore [reportMissingTypeStubs]
 from torch.utils.data import DataLoader
 
-from .dataset import HogeFugaDatum, HogeFugaDataset, ConfHogeFugaDataset
+from .domain import HogeFugaDatum
+from .dataset import HogeFugaDataset, ConfHogeFugaDataset
 from .corpus import prepare_corpora, ConfCorpora
 
 
