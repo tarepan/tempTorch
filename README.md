@@ -43,25 +43,12 @@ pip install git+https://github.com/user_name/repo_name
 ### Train
 Jump to ☞ [![ColabBadge]][notebook], then Run. That's all!  
 
-
-For arguments, check [./rnnms/config.py](https://github.com/user_name/repo_name/blob/main/pack_name/config.py).  
-For dataset, check [`speechcorpusy`](https://github.com/user_name/speechcorpusy).
+For arguments, check [./pack_name/config.py](https://github.com/user_name/repo_name/blob/main/pack_name/config.py).  
+For dataset, check [`speechcorpusy`](https://github.com/tarepan/speechcorpusy).  
 
 ### Inference
-
-#### CLI <!-- omit in toc -->
-```bash
-python -m pack_name.main_inference model_ckpt_path=XXX i_wav_path=YYY o_wav_path=ZZZ
-```
-#### Python <!-- omit in toc -->
-1-line load, 1-line preprocessing and 1-line inference!
-```python
-# Demo: wave_to_mel_to_wave reconstruction
-model    = RNNMS.load_from_checkpoint(checkpoint_path=CKPT_PATH)
-mel      = model.wav2mel(i_wav, orig_sr)
-o_wav, _ = model.predict(mel)
-```
-Executable demo here ☞ [![ColabBadge]][notebook]
+Both CLI and Python supported.  
+For detail, jump to ☞ [![ColabBadge]][notebook] and check it.  
 
 ## Results
 ### Sample <!-- omit in toc -->
