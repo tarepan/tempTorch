@@ -6,8 +6,9 @@ from dataclasses import dataclass
 
 from omegaconf import MISSING
 from configen import generate_conf_loader # pyright: ignore [reportMissingTypeStubs]
-from lightlightning import ConfTrain # pyright: ignore [reportMissingTypeStubs]
+from lightlightning import ConfTrain      # pyright: ignore [reportMissingTypeStubs]
 
+from .data.transform import ConfTransform
 from .data.datamodule import ConfData
 from .model import ConfModel
 
@@ -15,6 +16,16 @@ from .model import ConfModel
 CONF_DEFAULT_STR = """
 seed: 1234
 path_extend_conf: null
+transform:
+    load:
+        sampling_rate: 16000
+    preprocess:
+        piyo2hoge:
+            amp: 1.2
+        piyo2fuga:
+            div: 3.0
+    augment:
+        len_clip: 10
 model:
     net:
         dim_i: 1
@@ -25,6 +36,7 @@ model:
         learning_rate: 0.01
         sched_decay_rate: 0.01
         sched_decay_step: 1000
+    transform: "${transform}"
 data:
     adress_data_root: ""
     corpus:
@@ -41,8 +53,7 @@ data:
         n_test: 1
     dataset:
         attr1: 1
-        preprocess:
-            attr2: 100
+        transform: "${transform}"
     loader:
         batch_size_train: 1
         batch_size_val: 1
@@ -69,6 +80,7 @@ class ConfGlobal:
     """
     seed: int = MISSING
     path_extend_conf: Optional[str] = MISSING
+    transform: ConfTransform = ConfTransform()
     model: ConfModel = ConfModel()
     data: ConfData = ConfData()
     train: ConfTrain = ConfTrain()

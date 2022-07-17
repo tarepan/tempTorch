@@ -2,6 +2,7 @@
 
 
 from dataclasses import dataclass
+from pathlib import Path
 
 import torch.nn.functional as F
 from torch.optim import Adam
@@ -9,8 +10,9 @@ from torch.optim.lr_scheduler import StepLR
 import pytorch_lightning as pl
 from omegaconf import MISSING
 
-
 from .domain import HogeFugaBatch
+from .data.domain import Piyo
+from .data.transform import ConfTransform, augment, collate, load_raw, preprocess
 from .networks.network import Network, ConfNetwork
 
 
@@ -32,6 +34,7 @@ class ConfModel:
     """
     net: ConfNetwork = ConfNetwork()
     optim: ConfOptim = ConfOptim()
+    transform: ConfTransform = ConfTransform()
 
 class Model(pl.LightningModule):
     """The model.
@@ -67,7 +70,7 @@ class Model(pl.LightningModule):
         self.log('loss', loss) #type: ignore ; because of PyTorch-Lightning
         return {"loss": loss}
 
-    def validation_step(self, batch: HogeFugaBatch, batch_idx: int): # pyright: ignore [reportIncompatibleMethodOverride] ; pylint: disable=arguments-differ
+    def validation_step(self, batch: HogeFugaBatch, batch_idx: int): # pyright: ignore [reportIncompatibleMethodOverride] ; pylint: disable=arguments-differ,unused-argument
         """(PL API) Validate the model with a batch.
         """
 
@@ -117,11 +120,28 @@ class Model(pl.LightningModule):
     #     """(PL API) Run prediction with a batch. If not provided, predict_step == forward."""
     #     return pred
 
-    def preprocess(self):
-        pass
+    def sample(self) -> Piyo:
+        """Acquire sample input toward preprocess."""
 
-    def sample(self):
-        """Acquire sample input."""
-        pass
-        # wave, sr = librosa.load(librosa.example("libri2"), sr=self.conf.sampling_rate)
-        # return wave, sr
+        # Audio Example (librosa is not handled by this template)
+        import librosa # pyright: ignore [reportMissingImports, reportUnknownVariableType] ; pylint: disable=import-outside-toplevel,import-error
+        path: Path = librosa.example("libri2") # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
+
+        return load_raw(self._conf.transform.load, path)
+
+    def load(self, path: Path) -> Piyo:
+        """Load raw inputs.
+        Args:
+            path - Path to the input.
+        """
+        return load_raw(self._conf.transform.load, path)
+
+    def preprocess(self, piyo: Piyo) -> HogeFugaBatch:
+        """Preprocess raw inputs into model inputs for inference."""
+
+        conf = self._conf.transform
+        hoge_fuga = preprocess(conf.preprocess, piyo)
+        hoge_fuga_datum = augment(conf.augment, hoge_fuga)
+        batch = collate([hoge_fuga_datum])
+
+        return batch

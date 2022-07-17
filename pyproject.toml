@@ -36,4 +36,5 @@ build-backend = "poetry.core.masonry.api"
 disable = [
   # This is opinionated
   "line-too-long",
+  "pointless-string-statement",
 ]

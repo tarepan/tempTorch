@@ -6,18 +6,17 @@ from typing import List, Optional, Tuple
 from dataclasses import dataclass
 from hashlib import md5
 
-from torch import from_numpy, stack # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
 from torch.utils.data import Dataset
-import numpy as np
 from tqdm import tqdm
-from omegaconf import MISSING, SI
+from omegaconf import MISSING
 from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId               # pyright: ignore [reportMissingTypeStubs]
 from speechdatasety.helper.archive import try_to_acquire_archive_contents, save_archive # pyright: ignore [reportMissingTypeStubs]
-from speechdatasety.helper.adress import dataset_adress, generate_path_getter           # pyright: ignore [reportMissingTypeStubs]
+from speechdatasety.helper.adress import dataset_adress                                 # pyright: ignore [reportMissingTypeStubs]
+from speechdatasety.helper.access import generate_saver_loader                          # pyright: ignore [reportMissingTypeStubs]
 
-from ..domain import FugaBatched, HogeBatched, HogeFugaBatch, LenFuga
-from .domain import Hoge, HogeDatum, Fuga, FugaDatum, HogeFugaDatum
-from .preprocessing import preprocess_hogefuga, ConfPreprocessing
+from ..domain import HogeFugaBatch
+from .domain import HogeFuga_, HogeFugaDatum
+from .transform import ConfTransform, load_raw, preprocess, augment, collate
 
 
 """
@@ -44,6 +43,12 @@ from .preprocessing import preprocess_hogefuga, ConfPreprocessing
     For example, TTS will consumes single corpus, but voice conversion will consumes 'source' corpus and 'target' corpus.
     It means that init arguments are different between projects.
     For this reason, the Dataset do not have common init Inferface, it's up to you.
+
+[Disign Notes - Responsibility]
+    Data transformation itself is logical process (independent of implementation).
+    In implementation/engineering, load/save/archiving etc... is indispensable.
+    We could contain both data transform and enginerring in Dataset, but it can be separated.
+    For this reason, Dataset has responsibility for only data handling, not data transform.
 """
 
 
@@ -59,8 +64,7 @@ class ConfHogeFugaDataset:
     """
     adress_data_root: Optional[str] = MISSING
     attr1: int = MISSING
-    preprocess: ConfPreprocessing = ConfPreprocessing(
-        attr1=SI("${..attr1}"))
+    transform: ConfTransform = ConfTransform()
 
 class HogeFugaDataset(Dataset[HogeFugaDatum]):
     """The Hoge/Fuga dataset from the corpus.
@@ -78,14 +82,13 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
         self._items = items[1]
 
         # Calculate data path
-        conf_specifier = f"{conf.attr1}{conf.preprocess}"
+        conf_specifier = f"{conf.attr1}{conf.transform}"
         item_specifier = f"{list(map(lambda item: item[0], self._items))}"
         exp_specifier = md5((conf_specifier+item_specifier).encode()).hexdigest()
         self._adress_archive, self._path_contents = dataset_adress(
             conf.adress_data_root, self._corpus.__class__.__name__, "HogeFuga", exp_specifier
         )
-        self.get_path_hoge = generate_path_getter("hoge", self._path_contents)
-        self.get_path_fuga = generate_path_getter("fuga", self._path_contents)
+        self._save_hogefuga, self._load_hogefuga = generate_saver_loader(HogeFuga_, ["hoge", "fuga"], self._path_contents)
 
         # Deploy dataset contents
         ## Try to 'From pre-generated dataset archive'
@@ -104,12 +107,11 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
         # Lazy contents download
         self._corpus.get_contents()
 
-        # Preprocessing
-        for item in tqdm(self._items, desc="Preprocessing", unit="item"):
-            preprocess_hogefuga(
-                self._conf.preprocess, None,
-                item[1], self.get_path_hoge(item[0]), self.get_path_fuga(item[0]),
-            )
+        # Preprocessing - Load/Transform/Save
+        for item_id, item_path in tqdm(self._items, desc="Preprocessing", unit="item"):
+            piyo = load_raw(self._conf.transform.load, item_path)
+            hoge_fuga = preprocess(self._conf.transform.preprocess, piyo)
+            self._save_hogefuga(item_id, hoge_fuga)
 
         print("Archiving new dataset...")
         save_archive(self._path_contents, self._adress_archive)
@@ -117,41 +119,15 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
 
         print("Generated new dataset.")
 
-    def _load_datum(self, item_id: ItemId) -> HogeFugaDatum:
-        """Data load with dynamic data modification.
-
-        Load raw items, then dynamically modify it.
-        e.g. Random clipping, Random noise addition, Masking
-        """
-        # Load
-        hoge: Hoge = np.load(str(self.get_path_hoge(item_id))+".npy") # pyright: ignore [reportUnknownMemberType]
-        fuga: Fuga = np.load(str(self.get_path_fuga(item_id))+".npy") # pyright: ignore [reportUnknownMemberType]
-
-        # Modify
-        ## :: (T,) -> (T=10, 1)
-        hoge_datum: HogeDatum = np.expand_dims(hoge[:10], axis=-1) # pyright: ignore [reportUnknownMemberType]
-
-        ## :: (T,) -> (T=10, 1)
-        fuga_datum: FugaDatum = np.expand_dims(fuga[:10], axis=-1) # pyright: ignore [reportUnknownMemberType]
-
-        return hoge_datum, fuga_datum
-
     def __getitem__(self, n: int) -> HogeFugaDatum:
-        """Load the n-th datum from the dataset.
-
-        Args:
-            n : The index of the datum to be loaded
+        """(API) Load the n-th datum from the dataset with tranformation.
         """
-        return self._load_datum(self._items[n][0])
+        item_id = self._items[n][0]
+        return augment(self._conf.transform.augment, self._load_hogefuga(item_id))
 
     def __len__(self) -> int:
         return len(self._items)
 
     def collate_fn(self, items: List[HogeFugaDatum]) -> HogeFugaBatch:
         """(API) datum-to-batch function."""
-
-        hoge_batched: HogeBatched = stack([from_numpy(item[0]) for item in items])
-        fuga_batched: FugaBatched = stack([from_numpy(item[1]) for item in items])
-        len_fuga: LenFuga = [10, 10,]
-
-        return hoge_batched, fuga_batched, len_fuga
+        return collate(items)

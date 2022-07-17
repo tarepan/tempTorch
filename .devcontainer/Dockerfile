@@ -1,5 +1,5 @@
 # derived from Microsoft Python dev container (https://github.com/microsoft/vscode-dev-containers/tree/main/containers/python-3)
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.7
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.8
 
 # Colab versions @2022-05-24
 # Python:                 3.7.13

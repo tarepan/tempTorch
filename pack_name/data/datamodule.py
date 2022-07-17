@@ -45,9 +45,9 @@ class Data(LightningDataModule):
 
         if stage == "fit" or stage is None:
             self.dataset_train = HogeFugaDataset(self._conf.dataset, corpus_train)
-            self.dataset_val =   HogeFugaDataset(self._conf.dataset, corpus_val)
+            self.dataset_val   = HogeFugaDataset(self._conf.dataset, corpus_val)
         if stage == "test" or stage is None:
-            self.dataset_test =  HogeFugaDataset(self._conf.dataset, corpus_test)
+            self.dataset_test  = HogeFugaDataset(self._conf.dataset, corpus_test)
 
     def train_dataloader(self) -> DataLoader[HogeFugaDatum]:
         """(PL-API) Generate training dataloader."""
