@@ -13,14 +13,17 @@ if __name__ == "__main__":  # pragma: no cover
     parser.add_argument("-m", "--model-ckpt-path", required=True)
     parser.add_argument("-i", "--i-path",          required=True)
     parser.add_argument("-o", "--o-path",          required=True)
+    parser.add_argument("--device")
     args = parser.parse_args()
 
-    model = Model.load_from_checkpoint(checkpoint_path=args.model_ckpt_path) # type: ignore ; because of PyTorch Lightning
+    device = torch.device(args.device) if args.device else torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+
+    model: Model = Model.load_from_checkpoint(checkpoint_path=args.model_ckpt_path).to(device) # type: ignore ; because of PyTorch Lightning
     model.eval()
 
     with torch.inference_mode():
-        raw = model.load(args.i)
-        batch = model.preprocess(raw)
+        raw = model.load(args.i_path)
+        batch = model.preprocess(raw, args.device)
         o_pred = model.predict_step(batch, batch_idx=0)
 
     # Tensor[Batch=1, ...] => Tensor[...] => NDArray[...]

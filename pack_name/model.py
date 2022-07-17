@@ -3,7 +3,9 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
+import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
@@ -136,12 +138,16 @@ class Model(pl.LightningModule):
         """
         return load_raw(self._conf.transform.load, path)
 
-    def preprocess(self, piyo: Piyo) -> HogeFugaBatch:
+    def preprocess(self, piyo: Piyo, to_device: Optional[str] = None) -> HogeFugaBatch:
         """Preprocess raw inputs into model inputs for inference."""
 
         conf = self._conf.transform
         hoge_fuga = preprocess(conf.preprocess, piyo)
         hoge_fuga_datum = augment(conf.augment, hoge_fuga)
         batch = collate([hoge_fuga_datum])
+
+        # To device
+        device = torch.device(to_device) if to_device else torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+        batch = (batch[0].to(device), batch[1].to(device), batch[2])
 
         return batch
