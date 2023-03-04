@@ -22,11 +22,11 @@ Replace place holders
 
 - `repo_name`: GitHub Repository name
 - `user_name`: GitHub UserName
-- `packname`: Your Package name (all lower-case, w/o underscore, [by PEP8][pep8_packname])
+- `packname`: Your Package name (all lower-case, w/o underscore, [by PEP8][pep8_pack_name])
 
 Then, delete this clause.
 
-[pep8_packname]: https://peps.python.org/pep-0008/#package-and-module-names
+[pep8_pack_name]: https://peps.python.org/pep-0008/#package-and-module-names
 
 ## Demo
 Samples or Link to [demo page].  
