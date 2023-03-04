@@ -22,7 +22,7 @@ Replace place holders
 
 - `repo_name`: GitHub Repository name
 - `user_name`: GitHub UserName
-- `pack_name`: Your Package name (all lower-case, w/o underscore, [by PEP8][pep8_packname])
+- `packname`: Your Package name (all lower-case, w/o underscore, [by PEP8][pep8_packname])
 
 Then, delete this clause.
 
@@ -43,7 +43,7 @@ pip install git+https://github.com/user_name/repo_name
 ### Train
 Jump to ☞ [![ColabBadge]][notebook], then Run. That's all!  
 
-For arguments, check [./pack_name/config.py](https://github.com/user_name/repo_name/blob/main/pack_name/config.py).  
+For arguments, check [./packname/config.py](https://github.com/user_name/repo_name/blob/main/packname/config.py).  
 For dataset, check [`speechcorpusy`](https://github.com/tarepan/speechcorpusy).  
 
 ### Inference
@@ -76,5 +76,5 @@ bibtex
 
 [paper]:https://arxiv.org/abs/0000.00000
 [PaperBadge]:https://img.shields.io/badge/paper-arxiv.0000.00000-B31B1B.svg
-[notebook]:https://colab.research.google.com/github/user_name/repo_name/blob/main/pack_name.ipynb
+[notebook]:https://colab.research.google.com/github/user_name/repo_name/blob/main/packname.ipynb
 [demo page]:https://demo.project.your
