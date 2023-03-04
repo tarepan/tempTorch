@@ -20,9 +20,10 @@ Template for Machine Learning project with PyTorch.
 ## Template Usage <!-- omit in toc -->
 Replace place holders
 
-- `repo_name`: GitHub Repository name
 - `user_name`: GitHub UserName
+- `repo_name`: GitHub Repository name
 - `packname`: Your Package name (all lower-case, w/o underscore, [by PEP8][pep8_pack_name])
+- `0000.00000`: Arxiv paper id
 
 Then, delete this clause.
 
