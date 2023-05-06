@@ -1,6 +1,6 @@
 "Corpus splitting"
 
-from typing import Tuple
+
 from dataclasses import dataclass
 
 from omegaconf import MISSING, SI
@@ -45,7 +45,7 @@ class ConfCorpora:
     n_val: int = MISSING
     n_test: int = MISSING
 
-def prepare_corpora(conf: ConfCorpora) -> Tuple[CorpusItems, CorpusItems, CorpusItems]:
+def prepare_corpora(conf: ConfCorpora) -> tuple[CorpusItems, CorpusItems, CorpusItems]:
     """Instantiate corpuses and split them for datasets.
 
     Returns - CorpusItems for train/val/test

@@ -1,8 +1,6 @@
 """Data domain"""
 
 
-from typing import Tuple
-
 import numpy as np
 from numpy.typing import NDArray
 
@@ -27,7 +25,7 @@ Hoge_: Hoge = np.array([1.], dtype=np.float32)
 Fuga = NDArray[np.float32]
 Fuga_: Fuga = np.array([1.], dtype=np.float32)
 ## the item
-HogeFuga = Tuple[Hoge, Fuga]
+HogeFuga = tuple[Hoge, Fuga]
 HogeFuga_: HogeFuga = (Hoge_, Fuga_)
 
 # Dynamically-transformed Dataset datum
@@ -36,4 +34,4 @@ HogeDatum = NDArray[np.float32]
 ## Fuga :: (T=t, 1) - fuga fuga
 FugaDatum = NDArray[np.float32]
 ## the datum
-HogeFugaDatum = Tuple[Hoge, Fuga]
+HogeFugaDatum = tuple[Hoge, Fuga]

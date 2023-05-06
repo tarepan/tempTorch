@@ -1,7 +1,6 @@
 """The Child sub-module"""
 
 
-from typing import List
 from dataclasses import dataclass
 
 from torch import Tensor
@@ -27,7 +26,7 @@ class Child(nn.Module):
     def __init__(self, conf: ConfChild):
         super().__init__()
 
-        layers: List[nn.Module] = []
+        layers: list[nn.Module] = []
         layers += [nn.Linear(conf.dim_i, conf.dim_o), nn.ReLU()]
         layers += [nn.Dropout(conf.dropout)] if conf.dropout > 0. else []
         self.fc1 = nn.Sequential(*layers)

@@ -1,8 +1,6 @@
 """Domain"""
 
 
-from typing import List, Tuple
-
 from torch import Tensor # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
 
 
@@ -23,7 +21,7 @@ HogeBatched = Tensor
 ## :: (Batch=b, T=t, 1) - fuga fuga
 FugaBatched = Tensor
 ## :: (L=b,)            - Non-padded length of items in the FugaBatched
-LenFuga = List[int]
+LenFuga = list[int]
 
 ## the batch
-HogeFugaBatch = Tuple[HogeBatched, FugaBatched, LenFuga]
+HogeFugaBatch = tuple[HogeBatched, FugaBatched, LenFuga]

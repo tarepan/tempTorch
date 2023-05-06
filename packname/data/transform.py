@@ -1,7 +1,7 @@
 """Data transformation"""
 
+
 from dataclasses import dataclass
-from typing import List
 from pathlib import Path
 
 import numpy as np
@@ -138,7 +138,7 @@ def augment(conf: ConfAugment, hoge_fuga: HogeFuga) -> HogeFugaDatum:
 ###################################################################################################################################
 # [collation]
 
-def collate(datums: List[HogeFugaDatum]) -> HogeFugaBatch:
+def collate(datums: list[HogeFugaDatum]) -> HogeFugaBatch:
     """Collation (datum_to_batch) - Bundle multiple datum into a batch."""
 
     hoge_batched: HogeBatched = stack([from_numpy(datum[0]) for datum in datums])

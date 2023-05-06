@@ -1,7 +1,6 @@
 """Whole Configuration"""
 
 
-from typing import Optional
 from dataclasses import dataclass
 
 from omegaconf import MISSING
@@ -79,7 +78,7 @@ class ConfGlobal:
         path_extend_conf: Path of configuration yaml which extends default config
     """
     seed: int = MISSING
-    path_extend_conf: Optional[str] = MISSING
+    path_extend_conf: str | None = MISSING
     transform: ConfTransform = ConfTransform()
     model: ConfModel = ConfModel()
     data: ConfData = ConfData()

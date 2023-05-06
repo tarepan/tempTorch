@@ -2,7 +2,6 @@
 
 
 from pathlib import Path
-from typing import List, Optional, Tuple
 from dataclasses import dataclass
 from hashlib import md5
 
@@ -52,7 +51,7 @@ from .transform import ConfTransform, load_raw, preprocess, augment, collate
 """
 
 
-CorpusItems = Tuple[AbstractCorpus, List[Tuple[ItemId, Path]]]
+CorpusItems = tuple[AbstractCorpus, list[tuple[ItemId, Path]]]
 
 
 @dataclass
@@ -62,7 +61,7 @@ class ConfHogeFugaDataset:
         adress_data_root - Root adress of data
         att1 - Attribute #1
     """
-    adress_data_root: Optional[str] = MISSING
+    adress_data_root: str | None = MISSING
     attr1: int = MISSING
     transform: ConfTransform = ConfTransform()
 
@@ -128,6 +127,6 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
     def __len__(self) -> int:
         return len(self._items)
 
-    def collate_fn(self, items: List[HogeFugaDatum]) -> HogeFugaBatch:
+    def collate_fn(self, items: list[HogeFugaDatum]) -> HogeFugaBatch:
         """(API) datum-to-batch function."""
         return collate(items)

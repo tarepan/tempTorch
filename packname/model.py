@@ -3,13 +3,12 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
-import pytorch_lightning as pl
+import lightning as L
 from omegaconf import MISSING
 
 from .domain import HogeFugaBatch
@@ -38,7 +37,7 @@ class ConfModel:
     optim: ConfOptim = ConfOptim()
     transform: ConfTransform = ConfTransform()
 
-class Model(pl.LightningModule):
+class Model(L.LightningModule):
     """The model.
     """
 
@@ -138,7 +137,7 @@ class Model(pl.LightningModule):
         """
         return load_raw(self._conf.transform.load, path)
 
-    def preprocess(self, piyo: Piyo, to_device: Optional[str] = None) -> HogeFugaBatch:
+    def preprocess(self, piyo: Piyo, to_device: str | None = None) -> HogeFugaBatch:
         """Preprocess raw inputs into model inputs for inference."""
 
         conf = self._conf.transform

@@ -1,10 +1,9 @@
 """Data wrapper by PL-datamodule"""
 
 
-from typing import Optional
 from dataclasses import dataclass
 
-from pytorch_lightning import LightningDataModule
+import lightning.pytorch as pl
 from omegaconf import MISSING, SI
 from speechdatasety.helper.loader import generate_loader, ConfLoader # pyright: ignore [reportMissingTypeStubs]
 from torch.utils.data import DataLoader
@@ -18,14 +17,14 @@ from .corpus import prepare_corpora, ConfCorpora
 class ConfData:
     """Configuration of the Data.
     """
-    adress_data_root: Optional[str] = MISSING
+    adress_data_root: str | None = MISSING
     corpus: ConfCorpora = ConfCorpora(
         root=SI("${..adress_data_root}"))
     dataset: ConfHogeFugaDataset = ConfHogeFugaDataset(
         adress_data_root=SI("${..adress_data_root}"))
     loader: ConfLoader = ConfLoader()
 
-class Data(LightningDataModule):
+class Data(pl.LightningDataModule):
     """Data wrapper.
     """
     def __init__(self, conf: ConfData):
@@ -37,7 +36,7 @@ class Data(LightningDataModule):
     #     """
     #     pass
 
-    def setup(self, stage: Optional[str] = None) -> None:
+    def setup(self, stage: str | None = None) -> None:
         """(PL-API) Setup train/val/test datasets.
         """
 
