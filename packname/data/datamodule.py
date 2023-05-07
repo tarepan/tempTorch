@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass
 
-import lightning.pytorch as pl
+import lightning.pytorch as pl                                       # pyright: ignore [reportMissingTypeStubs]
 from omegaconf import MISSING, SI
 from speechdatasety.helper.loader import generate_loader, ConfLoader # pyright: ignore [reportMissingTypeStubs]
 from torch.utils.data import DataLoader

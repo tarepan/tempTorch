@@ -1,7 +1,7 @@
 """Run training"""
 
 
-import lightning as L
+import lightning as L            # pyright: ignore [reportMissingTypeStubs]
 
 # import torchaudio
 from lightlightning import train # pyright: ignore [reportMissingTypeStubs]

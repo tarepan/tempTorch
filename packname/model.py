@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
-import lightning as L
+import lightning as L                       # pyright: ignore [reportMissingTypeStubs]
 from omegaconf import MISSING
 
 from .domain import HogeFugaBatch
