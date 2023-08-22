@@ -11,12 +11,9 @@ python = "^3.10"
 numpy = "^1.22.4"
 tqdm = "4.*"
 omegaconf = "2.3.*"
-speechcorpusy = {git = "https://github.com/tarepan/speechcorpusy.git", rev = "main"}
+speechcorpusy  = {git = "https://github.com/tarepan/speechcorpusy.git",  rev = "main"}
 speechdatasety = {git = "https://github.com/tarepan/speechdatasety.git", rev = "main"}
-configen = {git = "https://github.com/tarepan/configen.git", rev = "main"}
-## Dependencies for Audio
-# pyloudnorm = "^0.1.0"
-# librosa = "^0.8.0"
+configen       = {git = "https://github.com/tarepan/configen.git",       rev = "main"}
 ## Poetry is not good for version control of PyTorch (it has many many variants for a version, so poetry become confused)
 ## torch = "2.0.0"
 ## torchaudio = "2.0.1"

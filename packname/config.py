@@ -4,8 +4,8 @@
 from dataclasses import dataclass
 
 from omegaconf import MISSING
-from configen import generate_conf_loader # pyright: ignore [reportMissingTypeStubs]
-from lightlightning import ConfTrain      # pyright: ignore [reportMissingTypeStubs]
+from configen import default, generate_conf_loader # pyright: ignore [reportMissingTypeStubs]
+from lightlightning import ConfTrain               # pyright: ignore [reportMissingTypeStubs]
 
 from .data.transform import ConfTransform
 from .data.datamodule import ConfData
@@ -72,17 +72,13 @@ train:
 
 @dataclass
 class ConfGlobal:
-    """Configuration of everything.
-    Args:
-        seed: PyTorch-Lightning's seed for every random system
-        path_extend_conf: Path of configuration yaml which extends default config
-    """
-    seed: int = MISSING
-    path_extend_conf: str | None = MISSING
-    transform: ConfTransform = ConfTransform()
-    model: ConfModel = ConfModel()
-    data: ConfData = ConfData()
-    train: ConfTrain = ConfTrain()
+    """Configuration of everything."""
+    seed:             int           = MISSING                  # PyTorch-Lightning's seed for every random system
+    path_extend_conf: None | str    = MISSING                  # Path of configuration yaml which extends default config
+    transform:        ConfTransform = default(ConfTransform())
+    model:            ConfModel     = default(ConfModel())
+    data:             ConfData      = default(ConfData())
+    train:            ConfTrain     = default(ConfTrain())
 
 
 # Exported

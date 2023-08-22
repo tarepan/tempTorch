@@ -3,9 +3,9 @@
 
 from dataclasses import dataclass
 
-from torch import Tensor
-import torch.nn as nn
-from omegaconf import MISSING, SI
+from torch import nn, Tensor
+from omegaconf import MISSING, II
+from configen import default      # pyright: ignore [reportMissingTypeStubs]
 
 from ..domain import HogeBatched
 from .child import Child, ConfChild
@@ -13,17 +13,13 @@ from .child import Child, ConfChild
 
 @dataclass
 class ConfNetwork:
-    """Configuration of the Network.
-
-    Args:
-        dim_i: Dimension size of input
-        dim_i: Dimension size of output
-    """
-    dim_i: int = MISSING
-    dim_o: int = MISSING
-    child: ConfChild = ConfChild(
-        dim_i=SI("${..dim_i}"),
-        dim_o=SI("${..dim_o}"),)
+    """Configuration of a `Network` instance."""
+    feat_i: int      = MISSING            # Feature dimension size of input
+    time_i: int      = MISSING            # Time    dimension size of input
+    feat_o: int      = MISSING            # Feature dimension size of output
+    child: ConfChild = default(ConfChild(
+        feat_i=II("..feat_i"),
+        feat_o=II("..feat_o"),))
 
 class Network(nn.Module):
     """The Network.
