@@ -3,8 +3,7 @@
 
 from dataclasses import dataclass
 
-from torch import Tensor
-import torch.nn as nn
+from torch import nn, Tensor
 from omegaconf import MISSING
 
 
@@ -26,16 +25,15 @@ class Child(nn.Module):
         layers += [nn.Dropout(conf.dropout)] if conf.dropout > 0. else []
         self.fc1 = nn.Sequential(*layers)
 
-    # Typing of PyTorch forward API is poor.
     def forward(self, i_pred: Tensor) -> Tensor: # pyright: ignore [reportIncompatibleMethodOverride]
         """(PT API) Forward a batch.
 
         Arguments:
-            i_pred :: (Batch, T, Feat=dim_i) - Input
+            i_pred :: (B, T, Feat=dim_i) - Input
         Returns:
-            o_pred :: (Batch, T, Feat=dim_o) - Prediction
+            o_pred :: (B, T, Feat=dim_o) - Prediction
         """
-        # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
+        # :: (B, T, Feat=dim_i) -> (B, T, Feat=dim_o)
         o_pred = self.fc1(i_pred)
 
         return o_pred
@@ -44,12 +42,12 @@ class Child(nn.Module):
         """Run inference with a batch.
 
         Arguments:
-            i_pred :: (Batch, T, Feat=dim_i) - Input
+            i_pred :: (B, T, Feat=dim_i) - Input
         Returns:
-            o_pred :: (Batch, T, Feat=dim_o) - Prediction
+            o_pred :: (B, T, Feat=dim_o) - Prediction
         """
 
-        # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
+        # :: (B, T, Feat=dim_i) -> (B, T, Feat=dim_o)
         o_pred = self.fc1(i_pred)
 
         return o_pred

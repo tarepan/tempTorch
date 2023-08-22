@@ -25,19 +25,18 @@ class Network(nn.Module):
     """The Network.
     """
     def __init__(self, conf: ConfNetwork):
-        super().__init__()
+        super().__init__() # pyright: ignore [reportUnknownMemberType]
 
         # Submodule
         self._child = Child(conf.child)
 
-    # Typing of PyTorch forward API is poor.
     def forward(self, hoge: HogeBatched) -> Tensor: # pyright: ignore [reportIncompatibleMethodOverride]
         """(PT API) Forward a batch.
 
-        Arguments:
-            hoge - Input Hoge
+        Args:
+            hoge                         - Input Hoge
         Returns:
-            o_pred :: (Batch, T, Feat=dim_o) - Prediction
+            o_pred :: (B, T, Feat=dim_o) - Prediction
         """
 
         # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
@@ -48,13 +47,13 @@ class Network(nn.Module):
     def generate(self, hoge: HogeBatched) -> Tensor:
         """Run inference with a batch.
 
-        Arguments:
-            hoge - Input Hoge
+        Args:
+            hoge                         - Input Hoge
         Returns:
-            o_pred :: (Batch, T, Feat=dim_o) - Prediction
+            o_pred :: (B, T, Feat=dim_o) - Prediction
         """
 
-        # :: (Batch, T, Feat=dim_i) -> (Batch, T, Feat=dim_o)
+        # :: (B, T, Feat=dim_i) -> (B, T, Feat=dim_o)
         o_pred = self._child(hoge)
 
         return o_pred

@@ -15,13 +15,8 @@ from torch import Tensor # pyright: ignore [reportUnknownVariableType] ; because
 
 
 # Data batch
-
-## :: (Batch=b, T=t, 1) - hoge hoge
-HogeBatched = Tensor
-## :: (Batch=b, T=t, 1) - fuga fuga
-FugaBatched = Tensor
-## :: (L=b,)            - Non-padded length of items in the FugaBatched
-LenFuga = list[int]
-
+HogeBatched = Tensor # :: (B=b, T=t, 1) - hoge hoge
+FugaBatched = Tensor # :: (B=b, T=t, 1) - fuga fuga
+LenFuga = list[int]  # :: (L=b,)        - Non-padded length of items in the FugaBatched
 ## the batch
 HogeFugaBatch = tuple[HogeBatched, FugaBatched, LenFuga]
