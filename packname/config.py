@@ -27,8 +27,9 @@ transform:
         len_clip: 10
 model:
     net:
-        dim_i: 1
-        dim_o: 1
+        feat_i: 1
+        time_i: 1
+        feat_o: 1
         child:
             dropout: 0.5
     optim:
