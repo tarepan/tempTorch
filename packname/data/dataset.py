@@ -66,8 +66,7 @@ class HogeFugaDataset(Dataset[HogeFugaDatum]):
             self._generate_dataset_contents()
 
     def _generate_dataset_contents(self) -> None:
-        """Generate dataset contents with corpus download, preprocessing and optional archiving.
-        """
+        """Generate dataset contents with corpus download, preprocessing and optional archiving."""
 
         print("Generating new dataset...")
 

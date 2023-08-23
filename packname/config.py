@@ -38,7 +38,7 @@ model:
         sched_decay_step: 1000
     transform: "${transform}"
 data:
-    adress_data_root: ""
+    root: ""
     corpus:
         train:
             name: "TEST"
