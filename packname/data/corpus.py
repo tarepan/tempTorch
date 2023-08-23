@@ -4,10 +4,10 @@
 from dataclasses import dataclass
 
 from omegaconf import MISSING, SI
-from speechcorpusy import load_preset # pyright: ignore [reportMissingTypeStubs]; bacause of library
-from speechcorpusy.interface import ConfCorpus # pyright: ignore [reportMissingTypeStubs]; bacause of library
-
-from .dataset import CorpusItems
+from speechcorpusy import load_preset                                     # pyright: ignore [reportMissingTypeStubs]; bacause of library
+from speechcorpusy.interface import ConfCorpus                            # pyright: ignore [reportMissingTypeStubs]; bacause of library
+from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId # pyright: ignore [reportMissingTypeStubs]
+from configen import default                                              # pyright: ignore [reportMissingTypeStubs]
 
 
 """
@@ -26,26 +26,22 @@ from .dataset import CorpusItems
 """
 
 
+CorpusItemIDs = tuple[AbstractCorpus, list[ItemId]]
+
 @dataclass
 class ConfCorpora:
-    """Configuration of Corpora.
+    """Configuration of a `Corpora` instance."""
+    root:   str        = MISSING             # Corpus data root
+    n_val:  int        = MISSING             # The number of validation items, for corpus split
+    n_test: int        = MISSING             # The number of test       items, for corpus split
+    train:  ConfCorpus = default(ConfCorpus(
+        root=SI("${..root}")))
+    val:    ConfCorpus = default(ConfCorpus(
+        root=SI("${..root}")))
+    test:   ConfCorpus = default(ConfCorpus(
+        root=SI("${..root}")))
 
-    Args:
-        root - Corpus data root
-        n_val - The number of validation items, for corpus split
-        n_test - The number of test items, for corpus split
-    """
-    root: str = MISSING
-    train: ConfCorpus = ConfCorpus(
-        root=SI("${..root}"))
-    val: ConfCorpus = ConfCorpus(
-        root=SI("${..root}"))
-    test: ConfCorpus = ConfCorpus(
-        root=SI("${..root}"))
-    n_val: int = MISSING
-    n_test: int = MISSING
-
-def prepare_corpora(conf: ConfCorpora) -> tuple[CorpusItems, CorpusItems, CorpusItems]:
+def prepare_corpora(conf: ConfCorpora) -> tuple[CorpusItemIDs, CorpusItemIDs, CorpusItemIDs]:
     """Instantiate corpuses and split them for datasets.
 
     Returns - CorpusItems for train/val/test
@@ -57,10 +53,10 @@ def prepare_corpora(conf: ConfCorpora) -> tuple[CorpusItems, CorpusItems, Corpus
 
     # Split
     ## e.g. Index-based split
-    val_test = conf.n_val+conf.n_test
-    items_train = corpus_train.get_identities()[:-val_test]
-    items_val = corpus_val.get_identities()[-val_test:-conf.n_test]
-    items_test = corpus_test.get_identities()[-conf.n_test:]
+    val_test = conf.n_val + conf.n_test
+    items_train = corpus_train.get_identities()[            :-val_test]
+    items_val   =   corpus_val.get_identities()[   -val_test:-conf.n_test]
+    items_test  =  corpus_test.get_identities()[-conf.n_test:]
     ## e.g. Speaker-based split
     # if conf.name == "JVS":
     #     speakers_val = ["jvs095", "jvs096", "jvs098"]
@@ -69,8 +65,8 @@ def prepare_corpora(conf: ConfCorpora) -> tuple[CorpusItems, CorpusItems, Corpus
     # items_val = list(filter(lambda item_id: item_id.speaker in speakers_val, corpus_val.get_identities()))
 
     # CorpusItem-nize
-    corpus_items_train: CorpusItems = (corpus_train, list(map(lambda item: (item, corpus_train.get_item_path(item)), items_train)))
-    corpus_items_val:   CorpusItems = (corpus_val,   list(map(lambda item: (item,   corpus_val.get_item_path(item)), items_val)))
-    corpus_items_test:  CorpusItems = (corpus_test,  list(map(lambda item: (item,  corpus_test.get_item_path(item)), items_test)))
+    corpus_items_train = (corpus_train, items_train)
+    corpus_items_val   = (corpus_val,   items_val)
+    corpus_items_test  = (corpus_test,  items_test)
 
     return corpus_items_train, corpus_items_val, corpus_items_test

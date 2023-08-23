@@ -7,9 +7,10 @@ from pathlib import Path
 import numpy as np
 from omegaconf import MISSING
 from torch import from_numpy, stack # pyright: ignore [reportUnknownVariableType] ; because of PyTorch ; pylint: disable=no-name-in-module
+from configen import default        # pyright: ignore [reportMissingTypeStubs]
 
 from ..domain import FugaBatched, HogeBatched, HogeFugaBatch, LenFuga
-from .domain import FugaDatum, HogeDatum, HogeFuga, HogeFugaDatum, Piyo, Hoge, Fuga
+from .domain import FugaDatum, HogeDatum, HogeFuga, HogeFugaDatum, Raw, Hoge, Fuga
 
 
 # [Data transformation]
@@ -38,69 +39,54 @@ class ConfLoad:
     """
     sampling_rate: int = MISSING
 
-def load_raw(conf: ConfLoad, path: Path) -> Piyo:
+def load_raw(conf: ConfLoad, path: Path) -> Raw:
     """Load raw data 'piyo' from the adress."""
 
     # Audio Example (librosa is not handled by this template)
     import librosa # pyright: ignore [reportMissingImports, reportUnknownVariableType] ; pylint: disable=import-outside-toplevel,import-error
-    piyo: Piyo = librosa.load(path, sr=conf.sampling_rate, mono=True)[0] # pyright: ignore [reportUnknownMemberType]
+    raw: Raw = librosa.load(path, sr=conf.sampling_rate, mono=True)[0] # pyright: ignore [reportUnknownMemberType,reportUnknownVariableType]
 
-    return piyo
+    return raw # pyright: ignore [reportUnknownVariableType]
 
 ###################################################################################################################################
 # [Preprocessing]
 
 @dataclass
-class ConfPiyo2Hoge:
-    """
-    Configuration of piyo-to-hoge preprocessing.
-    Args:
-        amp - Amplification factor
-    """
-    amp: float = MISSING
+class ConfRaw2Hoge:
+    """Configuration of `raw_to_hoge` preprocessing."""
+    amp: float = MISSING # Amplification factor
 
-def piyo_to_hoge(conf: ConfPiyo2Hoge, piyo: Piyo) -> Hoge:
-    """Convert piyo to hoge.
-    """
+def raw_to_hoge(conf: ConfRaw2Hoge, raw: Raw) -> Hoge:
+    """Convert piyo to hoge."""
     # Amplification :: (T,) -> (T,)
-    hoge: Hoge = piyo * conf.amp
+    hoge: Hoge = raw * conf.amp
 
     return hoge
 
 
 @dataclass
-class ConfPiyo2Fuga:
-    """
-    Configuration of piyo-to-fuga preprocessing.
-    Args:
-        div - Division factor
-    """
-    div: float = MISSING
+class ConfRaw2Fuga:
+    """Configuration of `raw_to_fuga` preprocessing."""
+    div: float = MISSING # Division factor
 
-def piyo_to_fuga(conf: ConfPiyo2Fuga, piyo: Piyo) -> Fuga:
-    """Convert piyo to fuga.
-    """
+def raw_to_fuga(conf: ConfRaw2Fuga, raw: Raw) -> Fuga:
+    """Convert piyo to fuga."""
     # Division :: (T,) -> (T,)
-    fuga: Fuga = piyo / conf.div
+    fuga: Fuga = raw / conf.div
 
     return fuga
 
 @dataclass
 class ConfPreprocess:
+    """Configuration of `preprocess` static transform.
+    This parameters are used as a part of the dataset identifier.
     """
-    Configuration of item-to-datum augmentation.
-    Args:
-        len_clip - Length of clipping
-    """
-    piyo2hoge: ConfPiyo2Hoge = ConfPiyo2Hoge()
-    piyo2fuga: ConfPiyo2Fuga = ConfPiyo2Fuga()
+    raw2hoge: ConfRaw2Hoge = default(ConfRaw2Hoge())
+    raw2fuga: ConfRaw2Fuga = default(ConfRaw2Fuga())
 
-def preprocess(conf: ConfPreprocess, raw: Piyo) -> HogeFuga:
-    """Preprocessing (raw_to_item) - Process raw data into item.
-
-    Piyo -> Hoge & Fuga
-    """
-    return piyo_to_hoge(conf.piyo2hoge, raw), piyo_to_fuga(conf.piyo2fuga, raw)
+def preprocess(conf: ConfPreprocess, raw: Raw) -> HogeFuga:
+    """Preprocessing (raw_to_item) - Statically process raw data into item."""
+    return raw_to_hoge(conf.raw2hoge, raw), raw_to_fuga(conf.raw2fuga, raw)
 
 ###################################################################################################################################
 # [Augmentation]

@@ -19,9 +19,9 @@ transform:
     load:
         sampling_rate: 16000
     preprocess:
-        piyo2hoge:
+        raw2hoge:
             amp: 1.2
-        piyo2fuga:
+        raw2fuga:
             div: 3.0
     augment:
         len_clip: 10
@@ -52,7 +52,7 @@ data:
         n_val: 1
         n_test: 1
     dataset:
-        attr1: 1
+        save_archive: False
         transform: "${transform}"
     loader:
         batch_size_train: 1

@@ -1,21 +1,17 @@
 """Datasets"""
 
-
-from pathlib import Path
 from dataclasses import dataclass
-from hashlib import md5
 
 from torch.utils.data import Dataset
 from tqdm import tqdm
 from omegaconf import MISSING
-from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId               # pyright: ignore [reportMissingTypeStubs]
-from speechdatasety.helper.archive import try_to_acquire_archive_contents, save_archive # pyright: ignore [reportMissingTypeStubs]
-from speechdatasety.helper.adress import dataset_adress                                 # pyright: ignore [reportMissingTypeStubs]
-from speechdatasety.helper.access import generate_saver_loader                          # pyright: ignore [reportMissingTypeStubs]
+from speechdatasety.interface.speechcorpusy import AbstractCorpus, ItemId # pyright: ignore [reportMissingTypeStubs]
+from configen import default                                              # pyright: ignore [reportMissingTypeStubs]
 
 from ..domain import HogeFugaBatch
 from .domain import HogeFuga_, HogeFugaDatum
 from .transform import ConfTransform, load_raw, preprocess, augment, collate
+from .dataset_utils import gen_ds_handlers
 
 
 """
@@ -31,18 +27,6 @@ from .transform import ConfTransform, load_raw, preprocess, augment, collate
     If we pass splitted items to the dataset, we can separate split logic from the dataset.
     For this reason, both corpus instance and selected item list are passed as arguments.
 
-[Design Notes - Corpus item path]
-    Corpus instance has path-getter method.
-    If we have multiple corpuses, we should distinguish the corpus that the item belongs to.
-    If we pass paths as arguments, this problem disappear.
-    For this reason, corpus_instance/selected_item_list/item_path are passed as arguments.
-
-[Design Notes - Init interface]
-    Dataset could consume multiple corpuses (corpus tuples), and the number is depends on project.
-    For example, TTS will consumes single corpus, but voice conversion will consumes 'source' corpus and 'target' corpus.
-    It means that init arguments are different between projects.
-    For this reason, the Dataset do not have common init Inferface, it's up to you.
-
 [Disign Notes - Responsibility]
     Data transformation itself is logical process (independent of implementation).
     In implementation/engineering, load/save/archiving etc... is indispensable.
@@ -51,82 +35,65 @@ from .transform import ConfTransform, load_raw, preprocess, augment, collate
 """
 
 
-CorpusItems = tuple[AbstractCorpus, list[tuple[ItemId, Path]]]
-
-
 @dataclass
 class ConfHogeFugaDataset:
-    """Configuration of HogeFuga dataset.
-    Args:
-        adress_data_root - Root adress of data
-        att1 - Attribute #1
-    """
-    adress_data_root: str | None = MISSING
-    attr1: int = MISSING
-    transform: ConfTransform = ConfTransform()
+    """Configuration of a `HogeFugaDataset` instance."""
+    root:         str | None    = MISSING                  # Dataset root adress
+    save_archive: bool          = MISSING                  # Whether to save dataset archive
+    transform:    ConfTransform = default(ConfTransform())
 
 class HogeFugaDataset(Dataset[HogeFugaDatum]):
-    """The Hoge/Fuga dataset from the corpus.
+    """The Hoge/Fuga dataset.
     """
-    def __init__(self, conf: ConfHogeFugaDataset, items: CorpusItems):
+    def __init__(self, conf: ConfHogeFugaDataset, corpus: AbstractCorpus, item_ids: list[ItemId]):
         """
         Args:
-            conf: The Configuration
-            items: Corpus instance and filtered item information (ItemId/Path pair)
+            conf     - The Configuration
+            corpus   - Corpus instance
+            item_ids - Selected items in the corpus
         """
 
-        # Store parameters
-        self._conf = conf
-        self._corpus = items[0]
-        self._items = items[1]
+        # Configs
+        item_names: list[str] = ["hoge", "fuga"]
 
-        # Calculate data path
-        conf_specifier = f"{conf.attr1}{conf.transform}"
-        item_specifier = f"{list(map(lambda item: item[0], self._items))}"
-        exp_specifier = md5((conf_specifier+item_specifier).encode()).hexdigest()
-        self._adress_archive, self._path_contents = dataset_adress(
-            conf.adress_data_root, self._corpus.__class__.__name__, "HogeFuga", exp_specifier
-        )
-        self._save_hogefuga, self._load_hogefuga = generate_saver_loader(HogeFuga_, ["hoge", "fuga"], self._path_contents)
+        # Values and Handlers
+        self._conf, self._corpus, self._item_ids = conf, corpus, item_ids
+        self._save_item, self._load_item, self._save_archive, load_archive, _ = gen_ds_handlers(conf.root, corpus, item_ids, conf.transform.preprocess, item_names, HogeFuga_)
 
-        # Deploy dataset contents
-        ## Try to 'From pre-generated dataset archive'
-        contents_acquired = try_to_acquire_archive_contents(self._adress_archive, self._path_contents)
-        ## From scratch
-        if not contents_acquired:
-            print("Dataset archive file is not found.")
+        # Deployment - Already-generated directory | extraction from pre-generated dataset archive | generation from scratch
+        contents_loaded = load_archive()
+        if not contents_loaded:
             self._generate_dataset_contents()
 
     def _generate_dataset_contents(self) -> None:
-        """Generate dataset with corpus auto-download and static preprocessing.
+        """Generate dataset contents with corpus download, preprocessing and optional archiving.
         """
 
         print("Generating new dataset...")
 
-        # Lazy contents download
+        # Download - Lazy corpus contents download
         self._corpus.get_contents()
 
         # Preprocessing - Load/Transform/Save
-        for item_id, item_path in tqdm(self._items, desc="Preprocessing", unit="item"):
-            piyo = load_raw(self._conf.transform.load, item_path)
-            hoge_fuga = preprocess(self._conf.transform.preprocess, piyo)
-            self._save_hogefuga(item_id, hoge_fuga)
+        for item_id in tqdm(self._item_ids, desc="Preprocessing", unit="item"):
+            raw = load_raw(self._conf.transform.load, self._corpus.get_item_path(item_id))
+            item = preprocess(self._conf.transform.preprocess, raw)
+            self._save_item(item_id, item)
 
-        print("Archiving new dataset...")
-        save_archive(self._path_contents, self._adress_archive)
-        print("Archived new dataset.")
+        # Archiving - Optionally archive the dataset contents as an archive file for reuse
+        if self._conf.save_archive:
+            self._save_archive()
 
         print("Generated new dataset.")
 
     def __getitem__(self, n: int) -> HogeFugaDatum:
-        """(API) Load the n-th datum from the dataset with tranformation.
+        """(API) Load the n-th datum from this dataset with augmentation (dynamic item tranformation).
         """
-        item_id = self._items[n][0]
-        return augment(self._conf.transform.augment, self._load_hogefuga(item_id))
+        return augment(self._conf.transform.augment, self._load_item(self._item_ids[n]))
 
     def __len__(self) -> int:
-        return len(self._items)
+        return len(self._item_ids)
 
     def collate_fn(self, items: list[HogeFugaDatum]) -> HogeFugaBatch:
-        """(API) datum-to-batch function."""
+        """(API) datum-to-batch function (dyamic datum transformaion & dynamic batching)."""
         return collate(items)

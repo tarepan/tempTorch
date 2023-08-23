@@ -3,10 +3,11 @@
 
 from dataclasses import dataclass
 
-import lightning.pytorch as pl                                       # pyright: ignore [reportMissingTypeStubs]
-from omegaconf import MISSING, SI
-from speechdatasety.helper.loader import generate_loader, ConfLoader # pyright: ignore [reportMissingTypeStubs]
 from torch.utils.data import DataLoader
+from omegaconf import MISSING, SI
+import lightning.pytorch as pl                                       # pyright: ignore [reportMissingTypeStubs]
+from speechdatasety.helper.loader import generate_loader, ConfLoader # pyright: ignore [reportMissingTypeStubs]
+from configen import default                                         # pyright: ignore [reportMissingTypeStubs]
 
 from .domain import HogeFugaDatum
 from .dataset import HogeFugaDataset, ConfHogeFugaDataset
@@ -17,12 +18,12 @@ from .corpus import prepare_corpora, ConfCorpora
 class ConfData:
     """Configuration of the Data.
     """
-    adress_data_root: str | None = MISSING
-    corpus: ConfCorpora = ConfCorpora(
-        root=SI("${..adress_data_root}"))
-    dataset: ConfHogeFugaDataset = ConfHogeFugaDataset(
-        adress_data_root=SI("${..adress_data_root}"))
-    loader: ConfLoader = ConfLoader()
+    adress_data_root: str | None          = MISSING
+    corpus:           ConfCorpora         = default(ConfCorpora(
+        root=SI("${..adress_data_root}")))
+    dataset:          ConfHogeFugaDataset = default(ConfHogeFugaDataset(
+        root=SI("${..adress_data_root}")))
+    loader:           ConfLoader          = default(ConfLoader())
 
 class Data(pl.LightningDataModule):
     """Data wrapper.
@@ -43,10 +44,10 @@ class Data(pl.LightningDataModule):
         corpus_train, corpus_val, corpus_test = prepare_corpora(self._conf.corpus)
 
         if stage == "fit" or stage is None:
-            self.dataset_train = HogeFugaDataset(self._conf.dataset, corpus_train)
-            self.dataset_val   = HogeFugaDataset(self._conf.dataset, corpus_val)
+            self.dataset_train = HogeFugaDataset(self._conf.dataset, *corpus_train)
+            self.dataset_val   = HogeFugaDataset(self._conf.dataset, *corpus_val)
         if stage == "test" or stage is None:
-            self.dataset_test  = HogeFugaDataset(self._conf.dataset, corpus_test)
+            self.dataset_test  = HogeFugaDataset(self._conf.dataset, *corpus_test)
 
     def train_dataloader(self) -> DataLoader[HogeFugaDatum]:
         """(PL-API) Generate training dataloader."""

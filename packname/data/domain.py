@@ -13,8 +13,10 @@ from numpy.typing import NDArray
     Internal data type of the data can be splitted into domain file.
 """
 
+# Raw datum
+Raw  = NDArray[np.float32] # :: (T,) - Raw datum
+
 # Statically-preprocessed item
-Piyo = NDArray[np.float32] # :: (T,) - piyo piyo
 Hoge = NDArray[np.float32] # :: (T,) - hoge hoge
 Fuga = NDArray[np.float32] # :: (T,) - fuga fuga
 ## the item

@@ -12,7 +12,7 @@ import lightning as L                       # pyright: ignore [reportMissingType
 from omegaconf import MISSING
 
 from .domain import HogeFugaBatch
-from .data.domain import Piyo
+from .data.domain import Raw
 from .data.transform import ConfTransform, augment, collate, load_raw, preprocess
 from .networks.network import Network, ConfNetwork
 
@@ -121,7 +121,7 @@ class Model(L.LightningModule):
     #     """(PL API) Run prediction with a batch. If not provided, predict_step == forward."""
     #     return pred
 
-    def sample(self) -> Piyo:
+    def sample(self) -> Raw:
         """Acquire sample input toward preprocess."""
 
         # Audio Example (librosa is not handled by this template)
@@ -130,14 +130,14 @@ class Model(L.LightningModule):
 
         return load_raw(self._conf.transform.load, path)
 
-    def load(self, path: Path) -> Piyo:
+    def load(self, path: Path) -> Raw:
         """Load raw inputs.
         Args:
             path - Path to the input.
         """
         return load_raw(self._conf.transform.load, path)
 
-    def preprocess(self, piyo: Piyo, to_device: str | None = None) -> HogeFugaBatch:
+    def preprocess(self, piyo: Raw, to_device: str | None = None) -> HogeFugaBatch:
         """Preprocess raw inputs into model inputs for inference."""
 
         conf = self._conf.transform
